@@ -1115,15 +1115,6 @@ class menu_4_1 extends JPanel {
 	JRadioButton r1 = new JRadioButton("jpg", true);
 	JRadioButton r2 = new JRadioButton("png");
 	
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == r1) {
-			pictureSrc = ".jpg";
-		} else if (e.getSource() == r2) {
-			pictureSrc = ".png";
-		}
-
-	}
-	
 	public menu_4_1(Menu panel) {
 		setBorder(BorderFactory.createEmptyBorder(10 , 10 , 10 , 10));
 		setPreferredSize(new Dimension(500, 275));
@@ -1160,6 +1151,20 @@ class menu_4_1 extends JPanel {
 		g.add(r2); picbtn.add(r2);
 		picture.add(pic);
 		picture.add(picbtn);
+		
+		r1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pictureSrc = ".jpg";
+			}
+		});
+		
+		r2.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pictureSrc = ".png";
+			}
+		});
 		
 		JPanel etcbtn = new JPanel();
 		//etcbtn.setBackground(mushroom);
@@ -1237,6 +1242,7 @@ class menu_4_1 extends JPanel {
 			}
 		});
 	}
+	
 }
 //네번째 메뉴 - VIEW
 class menu_4_2 extends JPanel {
