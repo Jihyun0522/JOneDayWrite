@@ -15,6 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -1106,16 +1110,15 @@ class menu_3_2 extends JPanel {
 }
 
 //네번째 메뉴 - ADD
-class menu_4_1 extends JPanel {
+class menu_4_1 extends JPanel implements ActionListener{
 	Date d = new Date();
 	SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
 	String ds = f.format(d);
-	String pictureSrc = "";
+	JLabel pictureSrc = new JLabel("");
+	JRadioButton r1, r2;
+	String p = null;
 	
-	JRadioButton r1 = new JRadioButton("jpg", true);
-	JRadioButton r2 = new JRadioButton("png");
-	
-	public menu_4_1(Menu panel) {
+	public menu_4_1(Menu panel) throws IOException {
 		setBorder(BorderFactory.createEmptyBorder(10 , 10 , 10 , 10));
 		setPreferredSize(new Dimension(500, 275));
 
@@ -1142,29 +1145,20 @@ class menu_4_1 extends JPanel {
 		JPanel pic = new JPanel();
 		JPanel picbtn = new JPanel();
 		JTextArea NamePicture = new JTextArea(1, 20);
-		JLabel name = new JLabel("사진 이름 ▼");
+		JLabel name = new JLabel("사진 이름 ▼ (OnedayWrite 폴더)");
 		NamePicture.setBorder(BorderFactory.createLineBorder(Color.RED));
 		pic.add(name);
 		pic.add(NamePicture);
 		ButtonGroup g = new ButtonGroup();
+		r1 = new JRadioButton("jpg", true);
+		r2 = new JRadioButton("png");
 		g.add(r1); picbtn.add(r1);
 		g.add(r2); picbtn.add(r2);
 		picture.add(pic);
 		picture.add(picbtn);
 		
-		r1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				pictureSrc = ".jpg";
-			}
-		});
-		
-		r2.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				pictureSrc = ".png";
-			}
-		});
+		r1.addActionListener(this);
+		r2.addActionListener(this);
 		
 		JPanel etcbtn = new JPanel();
 		//etcbtn.setBackground(mushroom);
@@ -1181,6 +1175,10 @@ class menu_4_1 extends JPanel {
 		add(qa);
 		add(picture);
 		add(etcbtn);
+		
+		if(NamePicture != null) {
+			p = NamePicture + pictureSrc.getText();
+		}
 		
 		save.addActionListener(new ActionListener() {
 			@Override
@@ -1202,7 +1200,7 @@ class menu_4_1 extends JPanel {
 					}
 					
 					if(diary == null) {
-						ps = connection.prepareStatement("INSERT INTO DIARY VALUES(?, ?, ?, ?, ?)");						
+						ps = connection.prepareStatement("INSERT INTO DIARY VALUES(?, ?, ?, ?, ?, ?)");						
 						ps.setString(1, qa.getText());
 						f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						ds = f.format(d);
@@ -1216,6 +1214,17 @@ class menu_4_1 extends JPanel {
 						f = new SimpleDateFormat("MM");
 						ds = f.format(d);
 						ps.setString(5, ds);
+						if(p != null) {
+							File file = new File(p);
+							FileInputStream is = new FileInputStream(file);
+							byte[] fileBytes = new byte[(int) file.length()];
+							is.read(fileBytes);
+							ps.setBytes(6, fileBytes);
+							
+							is.close();
+						} else {
+							ps.setString(6, null);
+						}
 							
 						int res = ps.executeUpdate();
 						if(res == 1) {
@@ -1229,11 +1238,13 @@ class menu_4_1 extends JPanel {
 					rs.close();
 					
 					connection.close();
-				} catch (ClassNotFoundException | SQLException e1) {
+				} catch (ClassNotFoundException | SQLException | IOException e1) {
 					System.out.println("Q&A 데이터베이스 연결 오류 " + e1.getMessage());
 				}
 			}
 		});
+		
+		//is.close();		
 		
 		clear.addActionListener(new ActionListener() {
 			@Override
@@ -1241,6 +1252,15 @@ class menu_4_1 extends JPanel {
 				qa.setText("");
 			}
 		});
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == r1) {
+			pictureSrc.setText(".jpg");
+		} else if (e.getSource() == r2) {
+			pictureSrc.setText(".png");
+		}
 	}
 	
 }
